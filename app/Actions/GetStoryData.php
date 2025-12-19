@@ -56,6 +56,7 @@ class GetStoryData
             'post-author' => $postAuthor,
             'issue-number' => $issueNum,
             'issue-date' => $date,
+            'url' => $this->url,
             'bcs-story-content' => $storyContent,
         ];
     }
