@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('issues', function (Blueprint $table) {
             $table->id();
-            $table->integer('issue');
-            $table->timestamp('publication');
+            $table->integer('issue_number');
+            $table->timestamp('publication_date');
             $table->timestamps();
         });
     }

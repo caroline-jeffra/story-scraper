@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('author_id');
+            $table->unsignedBigInteger('issue_id');
             $table->string('title');
             $table->string('url');
             $table->longText('content');
             $table->timestamps();
+
+            $table->foreign('issue_id')->references('id')->on('issues');
+            $table->foreign('author_id')->references('id')->on('authors');
         });
     }
 
