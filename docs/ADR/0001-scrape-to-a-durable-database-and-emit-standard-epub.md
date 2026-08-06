@@ -59,6 +59,63 @@ Concretely:
    `epubcheck`. Calibre is treated as one consumer to test against, not as the specification.
 5. **Generation is not delegated to Calibre.**
 
+## Stack as agreed
+
+The decision above is realised by the following stack. Recorded explicitly because two of these
+layers have colliding names, which has already caused one round of confusion: **SQLite** is the
+database engine, `sqlite3` is the stdlib driver SQLAlchemy uses beneath it, and **SQLAlchemy** is the
+toolkit and ORM. The persistence decision was about the *access layer*, not the engine — the rejected
+alternative was hand-written SQL over the stdlib driver, not a different database.
+
+### Data layer
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Database engine | **SQLite** | One file, no server, `FTS5` available for later full-text search |
+| Driver | `sqlite3` (stdlib) | Used via SQLAlchemy; not called directly |
+| Toolkit / ORM | **SQLAlchemy 2.0**, typed `Mapped[...]` models | The access-layer decision |
+| Migrations | **Alembic**, from the first schema commit | `db upgrade` is an explicit command, never automatic |
+| Location | `platformdirs` user-data dir | Precedence: `--db` flag → `STORY_SCRAPER_DB` env var → default |
+
+Required SQLite pragmas, set once via a SQLAlchemy `connect` event listener so every connection in the
+process inherits them:
+
+- `foreign_keys=ON` — **off by default in SQLite.** Without it the schema's foreign keys are not
+  enforced and orphan rows accumulate silently. Worth an explicit test that a bad FK raises.
+- `journal_mode=WAL` — better concurrency and durability; persists once set.
+- `busy_timeout` — wait on a locked database rather than failing immediately.
+
+### Application layer
+
+| Concern | Choice |
+|---|---|
+| Language / runtime | Python 3.13+ |
+| Env & packaging | `uv`, `pyproject.toml` (PEP 621), `src/` layout, `[project.scripts]` entry point |
+| CLI framework | `click` |
+| HTTP | `httpx`, with a polite user-agent, inter-request delay, retries, and an on-disk HTML cache |
+| HTML parsing | `BeautifulSoup4` + `lxml` — must be lenient; source pages contain malformed markup |
+| Sanitising | `nh3` |
+| EPUB output | Hand-rolled, conforming EPUB 3.3, no vendor metadata |
+| Validation | `epubcheck` |
+| Tests | `pytest`, with committed HTML fixtures |
+| Lint / types | `ruff` + `mypy` |
+
+### Architectural conventions
+
+- **Three layers, one direction of dependency.** `cli/` → `services/` → `db/`. Nothing below `cli/`
+  imports click, and nothing below `cli/` prints. Services take a session, return data, and raise
+  domain exceptions; the CLI renders and sets exit codes. This is what makes the behaviour testable
+  without invoking the CLI.
+- **One session per invocation, opened lazily.** No module-level session. Commands that need data open
+  a unit-of-work scope that commits on clean exit and rolls back on exception. Connecting in the group
+  callback instead would mean `--help` creates a database.
+- **Per-item commits for scrapes.** With URL-keyed upserts, an interrupted backfill stays resumable
+  and a re-run skips what is already stored.
+- **Schema version check before use**, with a clear instruction to run `db upgrade` rather than
+  migrating a data file silently.
+- **Data to stdout, everything else to stderr**, so output stays pipeable; human format by default,
+  `--json` available.
+
 ## Consequences
 
 ### Accepted benefits
