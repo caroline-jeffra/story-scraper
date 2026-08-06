@@ -1,0 +1,42 @@
+# --- Laravel prototype -----------------------------------------------------
+# Self-contained archive with its own git history. Excluded entirely from this
+# project; see the vault workspace Decisions note for why.
+prototype-archive/
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# NOTE: uv.lock is intentionally NOT ignored — commit it.
+
+# --- Local config & secrets ------------------------------------------------
+.env
+.env.local
+
+# --- Generated artefacts ---------------------------------------------------
+# The story database lives in the platformdirs user-data dir, but a --db
+# override or scratch run can drop one here.
+*.db
+*.sqlite
+*.sqlite3
+
+# Built books and any local HTML fetch cache
+*.epub
+.cache/
+
+# --- Editors & OS ----------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
