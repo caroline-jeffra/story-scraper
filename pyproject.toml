@@ -1,0 +1,16 @@
+[project]
+name = "story-scraper"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "c.jeffra", email = "caroline.jeffra@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+story-scraper = "story_scraper:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
