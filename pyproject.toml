@@ -23,3 +23,18 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.2",
 ]
+
+[tool.mypy]
+strict = true
+python_version = "3.13"
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

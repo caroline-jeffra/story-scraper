@@ -1,4 +1,7 @@
+"""Module for scraping short stories and supporting collecting into epub digests."""
+
 import click
+
 
 @click.group(name="story-scraper")
 @click.version_option(package_name="story-scraper")
