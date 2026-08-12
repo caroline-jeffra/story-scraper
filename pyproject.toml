@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-story-scraper = "story_scraper:main"
+story-scraper = "story_scraper.cli:cli"
 
 [build-system]
 requires = ["hatchling"]
