@@ -1,9 +1,9 @@
 [project]
 name = "story-scraper"
 version = "0.1.0"
-description = "Add your description here"
+description = "A small package for retrieving collections of html formatted short stories and generating custom epub digests"
 authors = [
-    { name = "c.jeffra", email = "caroline.jeffra@gmail.com" }
+    { name = "Caroline Jeffra", email = "caroline.jeffra@gmail.com" }
 ]
 requires-python = ">=3.13"
 dependencies = []
