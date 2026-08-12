@@ -8,7 +8,7 @@ from story_scraper.cli import cli
 
 
 def test_version_flag_reports_installed_version() -> None:
-    """`--version` exists cleanly and reports the installed package version."""
+    """`--version` exits cleanly and reports the installed package version."""
     runner = CliRunner()
 
     result = runner.invoke(cli, ["--version"])
