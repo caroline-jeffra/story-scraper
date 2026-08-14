@@ -3,7 +3,7 @@
 from datetime import date, datetime
 
 from sqlalchemy import ForeignKey, MetaData, UniqueConstraint, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 NAMING_CONVENTION: dict[str, str] = {
     "ix": "ix_%(column_0_label)s",
@@ -32,6 +32,8 @@ class Author(Base):
     slug: Mapped[str]
     bio_html: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    story_authors: Mapped[list["StoryAuthor"]] = relationship(back_populates="author")
 
 
 class Issue(Base):
@@ -69,6 +71,8 @@ class Story(Base):
     first_scraped_at: Mapped[datetime] = mapped_column(server_default=func.now())
     last_scraped_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
+    story_authors: Mapped[list["StoryAuthor"]] = relationship(back_populates="story")
+
 
 class Tag(Base):
     """A local classification label, assigned by the user rather than the source."""
@@ -79,3 +83,16 @@ class Tag(Base):
     name: Mapped[str] = mapped_column(unique=True)
     slug: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class StoryAuthor(Base):
+    """Links a story to one of its authors, preserving byline order."""
+
+    __tablename__ = "story_authors"
+
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id"), primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"), primary_key=True)
+    position: Mapped[int]
+
+    story: Mapped["Story"] = relationship(back_populates="story_authors")
+    author: Mapped["Author"] = relationship(back_populates="story_authors")
