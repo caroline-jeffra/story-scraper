@@ -1,8 +1,8 @@
 """SQLAlchemy declarative base and ORM models."""
 
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import MetaData, func
+from sqlalchemy import MetaData, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 NAMING_CONVENTION: dict[str, str] = {
@@ -31,4 +31,21 @@ class Author(Base):
     url: Mapped[str] = mapped_column(unique=True)
     slug: Mapped[str]
     bio_html: Mapped[str | None]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class Issue(Base):
+    """One published issue of a source periodical."""
+
+    __tablename__ = "issues"
+    __table_args__ = (UniqueConstraint("source", "issue_number"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str]
+    issue_number: Mapped[str]
+    publication_date: Mapped[date]
+    url: Mapped[str] = mapped_column(unique=True)
+    title: Mapped[str | None]
+    cover_url: Mapped[str | None]
+    cover_path: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
