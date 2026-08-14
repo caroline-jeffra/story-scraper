@@ -23,7 +23,7 @@ class Base(DeclarativeBase):
 class Author(Base):
     """A story author, identified by their profile URL."""
 
-    __tablename__ = "authors_TEMP"
+    __tablename__ = "authors"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     source: Mapped[str]
