@@ -74,17 +74,6 @@ class Story(Base):
     story_authors: Mapped[list["StoryAuthor"]] = relationship(back_populates="story")
 
 
-class Tag(Base):
-    """A local classification label, assigned by the user rather than the source."""
-
-    __tablename__ = "tags"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True)
-    slug: Mapped[str] = mapped_column(unique=True)
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-
-
 class StoryAuthor(Base):
     """Links a story to one of its authors, preserving byline order."""
 

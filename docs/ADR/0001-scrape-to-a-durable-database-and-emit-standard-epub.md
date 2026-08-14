@@ -18,7 +18,8 @@ Three further requirements emerged while scoping, and they turn out to be decisi
 
 - Later scrapes must not re-download or duplicate what is already stored.
 - Digests should be buildable from a **particular author's** stories across issues.
-- Digests should be buildable from **user-assigned tags**.
+- ~~Digests should be buildable from **user-assigned tags**.~~ **Dropped 2026-08-14** — see
+  *Amendments* below. The remaining two requirements carry the decision unchanged.
 
 Additional constraints:
 
@@ -52,8 +53,8 @@ Concretely:
    HTML fixtures.
 2. **SQLAlchemy over SQLite as the durable store.** Story URL is the natural key (enabling idempotent
    re-scrapes); `content_hash` distinguishes "already stored" from "changed upstream"; story-to-author
-   is many-to-many; tags are a local vocabulary.
-3. **A selection layer** that turns a query — by date, issue, author, or tag — into a `CollectionSpec`
+   is many-to-many.
+3. **A selection layer** that turns a query — by date, issue, or author — into a `CollectionSpec`
    describing both the story set and the resulting book's metadata.
 4. **Hand-rolled, conforming EPUB 3.3 output with no vendor-specific metadata**, validated by
    `epubcheck`. Calibre is treated as one consumer to test against, not as the specification.
@@ -120,8 +121,8 @@ process inherits them:
 
 ### Accepted benefits
 
-- The archive outlives any individual book, which is what makes dedup, author digests, tag digests,
-  and later full-text search possible at all.
+- The archive outlives any individual book, which is what makes dedup, author digests, and later
+  full-text search possible at all.
 - Parsers are testable with no network. Site drift becomes a failing test rather than a silent wrong
   result — the precise failure mode that killed the prototype.
 - Standard EPUB 3 output works in any reader and is checkable against a published spec rather than
@@ -200,6 +201,31 @@ EPUB mechanism, not a Calibre one.
 
 This project scrapes copyrighted fiction for personal library use. The `copyright_notice` field is
 populated and carried into the generated book rather than stripped.
+
+## Amendments
+
+### 2026-08-14 — User-assigned tags dropped
+
+The third scoping requirement above — digests buildable from user-assigned tags — is **withdrawn**.
+It was a remnant of the prototype era, when integration with Calibre was expected to be far closer
+and a local tag vocabulary was the natural way to mirror Calibre's own. With Calibre reduced to one
+consumer we test against (see *Alternatives* §5), a parallel tagging system this project would have
+to build, populate, and maintain by hand has no remaining justification. There will be no support
+for creating tags.
+
+Removed from the schema in §3 of the plan: the `tags` table and the `story_tags` junction. Nothing
+referenced them — no foreign key pointed at `tags` — so the removal is local to those two tables.
+The `tag` selector, the `tag add` / `tag rm` / `tags list` commands, and the tag-digest metadata
+mapping go with them.
+
+**This does not disturb the decision.** The rejection of a Calibre recipe (§1) rests on "every story
+by this author across all issues," which recipes cannot answer because they keep no store. That
+argument is untouched by tags, as are dedup, per-author digests, and later full-text search — the
+database remains the system of record for exactly the reasons given above.
+
+**Revisit if** classification becomes wanted later. The natural re-entry is a `tags` table plus an
+association object mirroring `story_authors`; note that with no payload column such a junction may
+use a plain `secondary=` relationship, which `story_authors` cannot.
 
 ## Related
 
