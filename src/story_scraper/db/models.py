@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 
-from sqlalchemy import MetaData, UniqueConstraint, func
+from sqlalchemy import ForeignKey, MetaData, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 NAMING_CONVENTION: dict[str, str] = {
@@ -49,3 +49,22 @@ class Issue(Base):
     cover_url: Mapped[str | None]
     cover_path: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class Story(Base):
+    """A single story, identified by its URL at the source."""
+
+    __tablename__ = "stories"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str]
+    issue_id: Mapped[int | None] = mapped_column(ForeignKey("issues.id"))
+    url: Mapped[str] = mapped_column(unique=True)
+    title: Mapped[str]
+    content_html: Mapped[str]
+    excerpt: Mapped[str | None]
+    copyright_notice: Mapped[str | None]
+    word_count: Mapped[int]
+    content_hash: Mapped[str]
+    first_scraped_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    last_scraped_at: Mapped[datetime] = mapped_column(server_default=func.now())
